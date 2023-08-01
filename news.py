@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 import streamlit as st
 
-news_url = st.text_input(label='请输入网址,图片在侧边栏')
+news_url = st.text_input(label='请输入网址,图片在侧边栏*目前支持 日刊 | Oricon')
 
 
 def nikkansports(news_url):

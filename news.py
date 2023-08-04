@@ -97,21 +97,21 @@ def mantan(url):
     if '/photopage' in url:
         url = url.replace('/photopage', '.html')
 
-        resp = requests.get(url)
-        resp.encoding = 'utf-8'  # 指定UTF-8编码
-        html_content = resp.text
-    
-        article_title = re.findall('<h1 class="article__title" .*?>(.*?)</h1>', html_content, re.S)[0]
-        st.subheader(article_title)
-    
-        # 文章部分
-        soup = BeautifulSoup(html_content, 'html.parser')
-        all_p_tags = soup.find_all('p', class_='article__text')
-        result_text = '<br></br>'.join([p.get_text(strip=True) for p in all_p_tags])
-        st.markdown(result_text, unsafe_allow_html=True)
-        img_re = re.findall(
-            '<div class="swiper-slide" .*?><a aria-current="page"href=".*?"class="router-link-active router-link-exact-active photo__photolist-item" .*?><img src="(.*?)"alt="".*?></a></div>',
-            html_content, re.S)
+    resp = requests.get(url)
+    resp.encoding = 'utf-8'  # 指定UTF-8编码
+    html_content = resp.text
+
+    article_title = re.findall('<h1 class="article__title" .*?>(.*?)</h1>', html_content, re.S)[0]
+    st.subheader(article_title)
+
+    # 文章部分
+    soup = BeautifulSoup(html_content, 'html.parser')
+    all_p_tags = soup.find_all('p', class_='article__text')
+    result_text = '<br></br>'.join([p.get_text(strip=True) for p in all_p_tags])
+    st.markdown(result_text, unsafe_allow_html=True)
+    img_re = re.findall(
+        '<div class="swiper-slide" .*?><a aria-current="page"href=".*?"class="router-link-active router-link-exact-active photo__photolist-item" .*?><img src="(.*?)"alt="".*?></a></div>',
+        html_content, re.S)
 
     # 图片部分
 

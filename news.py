@@ -8,9 +8,7 @@ import streamlit as st
 # 设置锚点
 st.markdown("""<a name="top"></a>""",unsafe_allow_html=True)
 # 设置页面标题
-st.set_page_config(
-    page_title="新闻抓图小工具",
-)
+st.set_page_config(page_title="新闻抓图小工具")
 
 news_url = st.text_input(label='请输入网址,图片在侧边栏 ')
 st.caption('*目前支持 Modelpress | 日刊Sports | Oricon news | Mantan-Web*')

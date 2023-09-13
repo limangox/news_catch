@@ -10,10 +10,8 @@ st.set_page_config(page_title="新闻抓图小工具")
 # 设置锚点
 st.markdown("""<a name="top"></a>""",unsafe_allow_html=True)
 
-
-
 news_url = st.text_input(label='请输入网址,图片在侧边栏 ')
-st.caption('*目前支持 Modelpress | 日刊Sports | Oricon news | Mantan-Web*')
+st.caption('*目前支持 MDPR | 日刊Sports | Oricon news | Mantan-Web*')
 
 
 def nikkansports(news_url):
@@ -103,6 +101,9 @@ def oricon(url):
 def mantan(url):
     global img_url
     global url_article
+    if 'gravure' in url and 'photo' not in url:
+        img_url = url.replace('.html', '/photopage/001.html')
+        url_article = url
     if 'photo' not in url:
         img_url = url.replace('.html', '/photopage/001.html')
         url_article = url
@@ -142,11 +143,46 @@ def mantan(url):
 
 
     # 图片部分
+    if 'gravure' in url:
+        resp = requests.get(img_url, headers=headers)
+        resp.encoding = 'utf-8'  # 指定UTF-8编码
+        img_content = resp.text
+        img_soup = BeautifulSoup(img_content, 'html.parser')
 
+        # 获取图片所在链接
+        url_list = []
+        for div_tag in img_soup.find_all('div', class_='swiper-slide'):
+            a_tag = div_tag.find('a')
+            if a_tag:
+                href = a_tag.get('href')
+                url_list.append(href)
+        # 获取图片链接
+        img_list = []
+        for url in url_list:
+            photo_url = f'https://gravure.mantan-web.jp{url}'
+            photo_url_resp = requests.get(photo_url, headers=headers).text
+            img_soup = BeautifulSoup(photo_url_resp, 'html.parser')
+            img_div = img_soup.find('div', class_='photo__photo--minh')
+            if img_div:
+                # 查找div标签下的img标签
+                img_tag = img_div.find('img')
+
+                if img_tag:
+                    img_src = img_tag.get('src')
+                    img_list.append(img_src)
+
+        i = 0
+        img_contnt = '<div style="display:inline">'
+        for img in range(len(img_list)):
+            pic = img_list[i].split('?')[0]
+            img_contnt += f'''<img src='{pic}' width="50%">'''
+            i += 1
+        st.markdown(img_contnt, unsafe_allow_html=True)
+
+    # 没有gravure
     resp = requests.get(img_url,headers=headers)
     resp.encoding = 'utf-8'  # 指定UTF-8编码
     img_content = resp.text
-
     img_soup = BeautifulSoup(img_content, 'html.parser')
 
     script_content = []
@@ -164,7 +200,6 @@ def mantan(url):
             pic = list_[i]['src']
             img_list.append(pic)
             i += 1
-
     i = 0
     img_contnt = '<div style="display:inline">'
     for img in range(len(img_list)):

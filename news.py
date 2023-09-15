@@ -57,12 +57,41 @@ def oricon(url):
         url = f'{url}/full/'
 
     resp = requests.get(url).text
-
+    # 文章标题
     article_title = re.findall('<title>(.*?)</title>', resp, re.S)[0]
     st.subheader(article_title)
 
-    article_text = re.sub(re.compile(r'<.*?>'), '', re.findall('<!--StartText-->(.*?)<!--EndText-->', resp, re.S)[0])
-    st.markdown(article_text, unsafe_allow_html=True)
+    # 文章正文
+    article_text1 = re.sub(re.compile(r'<.*?>'), '', re.findall('<!--StartText-->(.*?)<!--EndText-->', resp, re.S)[0])
+
+    # 第一种 script
+    script1 = re.findall(r'<div .*?>+<script>(.*?)</script></div>+', resp)
+
+    # 移除第一种 script
+    for script in script1:
+        article_text1 = article_text1.replace(script, '')
+
+    # 第二种 script
+    pattern = r"googletag\.cmd\.push\(function\(\) \{[^\}]*\}\);"
+    matches = re.findall(pattern, article_text1)
+
+    # 移除第二种 script
+    for script2 in matches:
+        article_text1 = article_text1.replace(script2, '')
+
+    # 第三种 script
+    pattern = r'<div class="gmossp_core_g939027">\s*<script>(.*?)</script>\s*</div>'
+    match = re.search(pattern, resp, re.DOTALL)
+
+    # 如果找到匹配项，提取 <script> 内容并移除
+    if match:
+        script3 = match.group(1)
+        article_text1 = article_text1.replace(script3, '')
+
+    # 输出提取的正文内容
+    st.markdown(article_text1.strip(), unsafe_allow_html=True)
+
+    # 图片
     img_re = re.findall('div class="unit-photo-preview"><h2 class="title">関連写真</h2>(.*?)</div>', resp, re.S)
 
     # 输出页面部分
@@ -85,7 +114,7 @@ def oricon(url):
     else:
         img_url = re.findall('<a href="(.*?)">', ''.join(img_re))
 
-        og_imgs = []
+        og_list = []
 
         i = 0
         for pic in img_url:
@@ -95,7 +124,16 @@ def oricon(url):
             for pic in og_imgs:
                 og_img = pic.replace('cdn-cgi/image/width=1200,quality=85,format=auto/', '')
                 i += 1
-                st.sidebar.image(og_img, width=350)
+                og_list.append(og_img)
+
+        st.caption(f'图片数量： {len(og_list)}')
+        x = 0
+        img_contnt = '<div style="display:inline">'
+        for img in range(len(og_list)):
+            pic = og_list[x]
+            img_contnt += f'''<img src='{pic}' width="50%">'''
+            x += 1
+        st.markdown(img_contnt, unsafe_allow_html=True)
 
 
 def mantan(url):

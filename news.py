@@ -6,14 +6,14 @@ from bs4 import BeautifulSoup
 import streamlit as st
 
 # 设置页面标题
-st.set_page_config(page_title="新闻抓图小工具")
+st.set_page_config(page_title="News pic tool")
 # 设置锚点
 st.markdown("""<a name="top"></a>""",unsafe_allow_html=True)
 st.write("""<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
      crossorigin="anonymous"></script></head>""",unsafe_allow_html=True)
 
 news_url = st.text_input(label='请输入网址,部分网站图片在侧边栏 ')
-st.caption('*目前支持 MDPR | 日刊Sports | Oricon news | Mantan-Web*')
+st.caption('*MDPR | 日刊Sports | Oricon news | Mantan-Web*')
 
 
 def nikkansports(news_url):

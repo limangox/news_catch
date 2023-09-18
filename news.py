@@ -9,17 +9,8 @@ import streamlit as st
 st.set_page_config(page_title="新闻抓图小工具")
 # 设置锚点
 st.markdown("""<a name="top"></a>""",unsafe_allow_html=True)
-code = """<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
-     crossorigin="anonymous"></script>"""
-
-a=os.path.dirname(st.__file__)+'./index.html'
-with open(a, 'r') as f:
-    data=f.read()
-    if len(re.findall('UA-', data))==0:
-        with open(a, 'w') as ff:
-            newdata=re.sub('<head>','<head>'+code,data)
-            ff.write(newdata)
+st.write("""<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
+     crossorigin="anonymous"></script></head>""",unsafe_allow_html=True)
 
 news_url = st.text_input(label='请输入网址,部分网站图片在侧边栏 ')
 st.caption('*目前支持 MDPR | 日刊Sports | Oricon news | Mantan-Web*')

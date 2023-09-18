@@ -308,7 +308,7 @@ if 'mantan' in news_url:
 if 'mdpr' in news_url:
     mdpr(news_url)
 
-if news_url is '':
+if news_url == '':
     pass
 else:
     st.markdown("""<a href="#top" style="text-decoration:none;border-radius:30px;padding: 10px 10px 10px 10px;display:block;margin:5px 5px 5px 5px;background-color:#9e3eb2;color:white;text-align:center;">返回顶部</a>""",unsafe_allow_html=True)

@@ -9,18 +9,8 @@ import streamlit as st
 st.set_page_config(page_title="新闻抓图小工具")
 # 设置锚点
 st.markdown("""<a name="top"></a>""",unsafe_allow_html=True)
-st.write("""<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
-     crossorigin="anonymous"></script>
-<!-- newscatch -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4156995100078455"
-     data-ad-slot="4122058970"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+st.write("""<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
+     crossorigin="anonymous"></script></head>
 """,unsafe_allow_html=True)
 
 news_url = st.text_input(label='请输入网址,部分网站图片在侧边栏 ')
@@ -312,3 +302,17 @@ if news_url == '':
     pass
 else:
     st.markdown("""<a href="#top" style="text-decoration:none;border-radius:30px;padding: 10px 10px 10px 10px;display:block;margin:5px 5px 5px 5px;background-color:#9e3eb2;color:white;text-align:center;">返回顶部</a>""",unsafe_allow_html=True)
+
+st.write("""<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
+     crossorigin="anonymous"></script>
+<!-- newscatch -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-4156995100078455"
+     data-ad-slot="4122058970"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+""",unsafe_allow_html=True)

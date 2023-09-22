@@ -6,14 +6,14 @@ from bs4 import BeautifulSoup
 import streamlit as st
 
 # 设置页面标题
-st.set_page_config(page_title="News pic tool")
+st.set_page_config(page_title="新闻抓图小工具")
 # 设置锚点
-st.markdown("""<a name="top"></a>""",unsafe_allow_html=True)
+st.markdown("""<a name="top"></a>""", unsafe_allow_html=True)
 st.write("""<head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
-     crossorigin="anonymous"></script></head>""",unsafe_allow_html=True)
+     crossorigin="anonymous"></script></head>""", unsafe_allow_html=True)
 
-news_url = st.text_input(label='请输入网址,部分网站图片在侧边栏 ')
-st.caption('*MDPR | 日刊Sports | Oricon news | Mantan-Web*')
+news_url = st.text_input(label='请输入网址,图片在侧边栏 ')
+st.caption('*目前支持 MDPR | 日刊Sports | Oricon news | Mantan-Web*')
 
 
 def nikkansports(news_url):
@@ -98,22 +98,72 @@ def oricon(url):
 
     # 输出页面部分
 
-    if '関連写真' not in resp:
+    if 'この記事の写真を見る' in resp:
+        pic_num = re.findall('この記事の写真を見る（全(.*?)枚）', resp)[0]
+        photo_url = f'{url.replace("full/", "")}photo/1/'
+
+        photo_url_resp = requests.get(photo_url).text
+        soup = BeautifulSoup(photo_url_resp, 'html.parser')
+
+        # 找到<div class="photo_slider" id="photo_slider_box">元素
+        photo_slider_div = soup.find('div', class_='photo_slider', id='photo_slider_box')
+
+        # 在<div>元素中查找所有带有href属性的<a>标签
+        href_tags = photo_slider_div.find_all('a', href=True)
+
+        # 创建一个空的链接列表
+        link_list = []
+
+        # 提取所有的链接地址并添加到列表中
+        for tag in href_tags:
+            link_list.append(f"https://www.oricon.co.jp{tag['href']}")
+
+        i = 0
+        img_list = []
+        for link in range(len(link_list)):
+            # 请求每个link
+            link_resp = requests.get(link_list[i]).text
+            # 找到每个link里面所有的原图
+            og_img = re.findall('<meta property="og:image" content="(.*?)">', link_resp)[0].replace('width=1200,quality=85,', '')
+            # 把图片链接放入图片列表
+            img_list.append(og_img)
+            i += 1
+        st.caption(f'图片数量： {len(img_list)}')
+        x = 0
+        img_contnt = '<div style="display:inline">'
+        for img in range(len(img_list)):
+            pic = img_list[x]
+            img_contnt += f'''<img src='{pic}' width="50%">'''
+            x += 1
+        st.markdown(img_contnt, unsafe_allow_html=True)
+
+    if 'この記事の写真を見る' not in resp and '関連写真' not in resp:
 
         img = ''.join(re.findall('<!--StartText-->(.*?)<!--EndText-->', resp, re.S))
-        img_list = re.findall('<a\s+[^>]*href="([^"]*photo[^"]*)"[^>]*>', img)
+        img_urls = re.findall('<a\s+[^>]*href="([^"]*photo[^"]*)"[^>]*>', img)
         i = 0
-        for url in img_list:
+        img_list = []
+        for url in img_urls:
             if 'photo' in url:
-                img_url = img_list[i]
+                img_url = img_urls[i]
                 ori_resp = requests.get(img_url).text
-                i += 1
                 og_imgs = re.findall('<meta property="og:image" content="(.*?)">', ori_resp)
+                i += 1
+
                 for pic in og_imgs:
                     og_img = pic.replace('cdn-cgi/image/width=1200,quality=85,format=auto/', '')
-                    st.sidebar.image(og_img, width=350)
+                    img_list.append(og_img)
 
-    else:
+        st.caption(f'图片数量： {len(img_list)}')
+        x = 0
+        img_contnt = '<div style="display:inline">'
+        for img in range(len(img_list)):
+            pic = img_list[x]
+            img_contnt += f'''<img src='{pic}' width="50%">'''
+            x += 1
+        st.markdown(img_contnt, unsafe_allow_html=True)
+
+    if 'この記事の写真を見る' not in resp and '関連写真' in resp:
         img_url = re.findall('<a href="(.*?)">', ''.join(img_re))
 
         og_list = []
@@ -149,7 +199,7 @@ def mantan(url):
         url_article = url
     if 'photo' in url:
         img_url = url
-        url_article = img_url.replace('/photopage/001.html','.html')
+        url_article = img_url.replace('/photopage/001.html', '.html')
 
     headers = {
         'referer': 'https://mantan-web.jp',
@@ -157,7 +207,7 @@ def mantan(url):
     }
 
     # 文字部分
-    resp = requests.get(url_article,headers=headers)
+    resp = requests.get(url_article, headers=headers)
     resp.encoding = 'utf-8'  # 指定UTF-8编码
     html_content = resp.text
 
@@ -180,7 +230,6 @@ def mantan(url):
     all_p_tags = soup.find_all('p', class_='article__text')
     result_text = '<br></br>'.join([p.get_text(strip=True) for p in all_p_tags])
     st.markdown(result_text, unsafe_allow_html=True)
-
 
     # 图片部分
     if 'gravure' in url:
@@ -220,7 +269,7 @@ def mantan(url):
         st.markdown(img_contnt, unsafe_allow_html=True)
 
     # 没有gravure
-    resp = requests.get(img_url,headers=headers)
+    resp = requests.get(img_url, headers=headers)
     resp.encoding = 'utf-8'  # 指定UTF-8编码
     img_content = resp.text
     img_soup = BeautifulSoup(img_content, 'html.parser')
@@ -249,9 +298,7 @@ def mantan(url):
     st.markdown(img_contnt, unsafe_allow_html=True)
 
 
-
 def mdpr(url):
-
     mdpr_headers = {
         'referer': f'{url}',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
@@ -266,7 +313,7 @@ def mdpr(url):
     mdpr_photo_resp = requests.get(url, headers=mdpr_headers).text
     # 标题
     mdpr_arti_title = re.findall('<h1 class="p-articleHeader__title">(.*?)</h1>', mdpr_photo_resp)[0]
-    st.subheader(mdpr_arti_title,anchor='title')
+    st.subheader(mdpr_arti_title, anchor='title')
 
     soup = BeautifulSoup(mdpr_photo_resp, 'html.parser')
     # 获取头图
@@ -284,8 +331,7 @@ def mdpr(url):
         pic = img_list[i].split('?')[0]
         img_contnt += f'''<img src='{pic}' width="50%">'''
         i += 1
-    st.markdown(img_contnt,unsafe_allow_html=True)
-
+    st.markdown(img_contnt, unsafe_allow_html=True)
 
 
 if 'nikkansports' in news_url:
@@ -300,18 +346,6 @@ if 'mdpr' in news_url:
 if news_url == '':
     pass
 else:
-    st.markdown("""<a href="#top" style="text-decoration:none;border-radius:30px;padding: 10px 10px 10px 10px;display:block;margin:5px 5px 5px 5px;background-color:#9e3eb2;color:white;text-align:center;">返回顶部</a>""",unsafe_allow_html=True)
-
-st.write("""<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4156995100078455"
-     crossorigin="anonymous"></script>
-<!-- newscatch -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-4156995100078455"
-     data-ad-slot="4122058970"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-""",unsafe_allow_html=True)
+    st.markdown(
+        """<a href="#top" style="text-decoration:none;border-radius:30px;padding: 10px 10px 10px 10px;display:block;margin:5px 5px 5px 5px;background-color:#9e3eb2;color:white;text-align:center;">返回顶部</a>""",
+        unsafe_allow_html=True)

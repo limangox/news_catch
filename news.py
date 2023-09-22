@@ -16,6 +16,7 @@ news_url = st.text_input(label='请输入网址,图片在侧边栏 ')
 st.caption('*目前支持 MDPR | 日刊Sports | Oricon news | Mantan-Web*')
 
 
+@st.cache_data(ttl=43200)
 def nikkansports(news_url):
     if '/photonews/photonews_nsInc_' in news_url:
         news_url = news_url.replace(news_url,
@@ -54,6 +55,7 @@ def nikkansports(news_url):
     st.markdown(article_text, unsafe_allow_html=True)
 
 
+@st.cache_data(ttl=43200)
 def oricon(url):
     if 'full' not in url:
         url = f'{url}/full/'
@@ -124,7 +126,8 @@ def oricon(url):
             # 请求每个link
             link_resp = requests.get(link_list[i]).text
             # 找到每个link里面所有的原图
-            og_img = re.findall('<meta property="og:image" content="(.*?)">', link_resp)[0].replace('width=1200,quality=85,', '')
+            og_img = re.findall('<meta property="og:image" content="(.*?)">', link_resp)[0].replace(
+                'width=1200,quality=85,', '')
             # 把图片链接放入图片列表
             img_list.append(og_img)
             i += 1
@@ -188,6 +191,7 @@ def oricon(url):
         st.markdown(img_contnt, unsafe_allow_html=True)
 
 
+@st.cache_data(ttl=43200)
 def mantan(url):
     global img_url
     global url_article
@@ -298,6 +302,7 @@ def mantan(url):
     st.markdown(img_contnt, unsafe_allow_html=True)
 
 
+@st.cache_data(ttl=43200)
 def mdpr(url):
     mdpr_headers = {
         'referer': f'{url}',

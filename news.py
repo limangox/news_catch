@@ -118,7 +118,7 @@ def oricon(url):
         for tag in href_tags:
             link_list.append(f"https://www.oricon.co.jp{tag['href']}")
 
-          i = 0
+        i = 0
         img_list = []
         for link in range(len(link_list)):
             # 请求每个link

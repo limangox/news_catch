@@ -118,14 +118,15 @@ def oricon(url):
         for tag in href_tags:
             link_list.append(f"https://www.oricon.co.jp{tag['href']}")
 
-        i = 0
+          i = 0
         img_list = []
         for link in range(len(link_list)):
             # 请求每个link
             link_resp = requests.get(link_list[i]).text
             # 找到每个link里面所有的原图
-            og_img = re.findall('<meta property="og:image" content="(.*?)">', link_resp)[0].replace(
-                'width=1200,quality=85,', '')
+            og_img = re.findall('<meta property="og:image" content="(.*?)">', link_resp, re.S)
+            if og_img:
+                og_img = og_img[0].replace('width=1200,quality=85,', '')
             # 把图片链接放入图片列表
             img_list.append(og_img)
             i += 1

@@ -55,11 +55,13 @@ def nikkansports(news_url):
 
 
 def oricon(url):
-    url_new = ''
-    if 'full' not in url:
-        url_new = f'{url}/full/'
-    if 'full' not in url and len(url) > 38:
-        url_new = f'{url[:38]}/full/'
+   url_new = ''
+   if 'full' not in url:
+       url_new = f'{url}/full/'
+   elif 'full' not in url and len(url) > 38:
+       url_new = f'{url[:38]}/full/'
+   elif 'full' in url:
+       url_new = url
     resp = requests.get(url_new).text
     # 文章标题
     article_title = re.findall('<title>(.*?)</title>', resp, re.S)[0]
